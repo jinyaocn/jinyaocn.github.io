@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="google-site-verification" content="B4tYwMwNVJBQs7qgvVFPyfQXT3n2raGfBrAz5PSkIcs">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/new_favicon.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/new_favicon.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/new_favicon.png?v=7.1.1">
+
+
+  <link rel="mask-icon" href="/images/new_favicon.png?v=7.1.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.1.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="CenterNet: Keypoint Triplets for Object Detection作者团队：中科院、牛津大学、华为诺亚方舟实验室原文链接：https://arxiv.org/abs/1904.08189repo：https://github.com/Duankaiwen/CenterNet">
+<meta name="keywords" content="object detection,one-stage">
+<meta property="og:type" content="article">
+<meta property="og:title" content="论文阅读笔记-CenterNet">
+<meta property="og:url" content="http://jinyaocn.github.io/2019/05/29/论文阅读笔记-CenterNet/index.html">
+<meta property="og:site_name" content="Jin Yao&#39;s Blog">
+<meta property="og:description" content="CenterNet: Keypoint Triplets for Object Detection作者团队：中科院、牛津大学、华为诺亚方舟实验室原文链接：https://arxiv.org/abs/1904.08189repo：https://github.com/Duankaiwen/CenterNet">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://jinyaocn.github.io/2019/05/29/论文阅读笔记-CenterNet/fig1.png">
+<meta property="og:image" content="http://jinyaocn.github.io/2019/05/29/论文阅读笔记-CenterNet/fig2.png">
+<meta property="og:image" content="http://jinyaocn.github.io/2019/05/29/论文阅读笔记-CenterNet/fig3.png">
+<meta property="og:image" content="http://jinyaocn.github.io/2019/05/29/论文阅读笔记-CenterNet/fig4.png">
+<meta property="og:image" content="http://jinyaocn.github.io/2019/05/29/论文阅读笔记-CenterNet/fig5.png">
+<meta property="og:image" content="http://jinyaocn.github.io/2019/05/29/论文阅读笔记-CenterNet/fig6.png">
+<meta property="og:image" content="http://jinyaocn.github.io/2019/05/29/论文阅读笔记-CenterNet/fig7.png">
+<meta property="og:image" content="http://jinyaocn.github.io/2019/05/29/论文阅读笔记-CenterNet/fig8.png">
+<meta property="og:updated_time" content="2019-07-11T03:32:07.834Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="论文阅读笔记-CenterNet">
+<meta name="twitter:description" content="CenterNet: Keypoint Triplets for Object Detection作者团队：中科院、牛津大学、华为诺亚方舟实验室原文链接：https://arxiv.org/abs/1904.08189repo：https://github.com/Duankaiwen/CenterNet">
+<meta name="twitter:image" content="http://jinyaocn.github.io/2019/05/29/论文阅读笔记-CenterNet/fig1.png">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="http://jinyaocn.github.io/2019/05/29/论文阅读笔记-CenterNet/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>论文阅读笔记-CenterNet | Jin Yao's Blog</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Jin Yao's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">Stay hungry，stay foolish</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>Categories</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>About</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://jinyaocn.github.io/2019/05/29/论文阅读笔记-CenterNet/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Jin Yao">
+      <meta itemprop="description" content="Yestearday you said tomorrow">
+      <meta itemprop="image" content="/images/jinyao.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Jin Yao's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">论文阅读笔记-CenterNet
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-05-29 20:11:22" itemprop="dateCreated datePublished" datetime="2019-05-29T20:11:22+08:00">2019-05-29</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/object-detection/" itemprop="url" rel="index"><span itemprop="name">object detection</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             Views:  
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>CenterNet: Keypoint Triplets for Object Detection<br>作者团队：中科院、牛津大学、华为诺亚方舟实验室<br>原文链接：<a href="https://arxiv.org/abs/1904.08189" target="_blank" rel="noopener">https://arxiv.org/abs/1904.08189</a><br>repo：<a href="https://github.com/Duankaiwen/CenterNet" target="_blank" rel="noopener">https://github.com/Duankaiwen/CenterNet</a></p>
+<hr>
+<a id="more"></a>
+<h2 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h2><p>　　本文提出的网络模型基于<a href="https://arxiv.org/abs/1808.01244" target="_blank" rel="noopener">CornerNet</a>，在top-left和bottom-right点上又引入了一个中心点，可以有效地抑制误检，同时引入了cascade pooling与center pooling两种池化方式。CoCo上mAP达到了恐怖的47.0%，远超于其他的one-stage网络。</p>
+<h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>　　基于anchor-based的检测方法，通常需要大量的anchor boxes来确保较高的IoU值。其次，anchor boxes的使用引入了许多超参数和设计选择，包括多少个box，大小和宽高比。为了克服这些缺点，Hei Law提出了CornerNet。CornerNet，一种新的one-stage目标检测方法，不再使用anchor boxes，而将一个目标物体检测为一对关键点：边界框的左上角和右下角。<br>　　但是由于其缺乏对目标全局信息的参考，CornerNet有很大的局限性，而且CornerNet对边缘信息非常敏感。为了解决这个问题，本文改进了CornerNet网络，提出CenterNet模型。CenterNet原理如下：<br>　　主要基于以下推论：<strong>如果目标框是准确的，那么在其中心区域能够检测到目标中心点的概率就会很高，反之亦然。</strong>如下图，CenterNet首先利用左上与右下点生成初始目标框，对于每个目标框定义一个中心区域（红色阴影矩形框）。然后判断每个目标框的中心区域是否含有中心点，若有则保留该目标框，若无则删除该目标框。<br><img src="fig1.png" alt="你想输入的替代文字"></p>
+<h2 id="模型设计"><a href="#模型设计" class="headerlink" title="模型设计"></a>模型设计</h2><h3 id="总览"><a href="#总览" class="headerlink" title="总览"></a>总览</h3><p>　　下图是网络的结构图<br><img src="fig2.png" alt="你想输入的替代文字"><br>　　主干网络采用了和CornerNet相同的沙漏网络，网络分别使用cascade corner pooling和center pooling生成两个corner heatmaps和一个center keypoint heatmap，然后再通过以下步骤产生bounding boxes：</p>
+<ul>
+<li>根据得分选取前面k个关键点；</li>
+<li>根据偏移量remap至输入图像中；</li>
+<li>给每个bounding box定义一个中心区域，检查中心区域是否包含中心点，并且保证类别与bounding box的一致；</li>
+<li>如果中心区域检测到中心点，则保留该边界框，并且使用左上角，右下角及中心点的分数的平均值更新边界框的分数，否则移除该边界框。</li>
+</ul>
+<hr>
+<p>　　中心区域的大小影响检测结果，如果区域过小，导致小目标检测效果不好，过大，精度降低，为解决这个问题，提出了尺度可调节的中心区域法，如下图所示：<br><img src="fig3.png" alt="你想输入的替代文字"><br><img src="fig4.png" alt="你想输入的替代文字"></p>
+<h3 id="Center-pooling"><a href="#Center-pooling" class="headerlink" title="Center pooling"></a>Center pooling</h3><p>　　目标物的几何中心可能丢失语义信息，比如（人的头部包含很强的语义信息，但几何中心大部分在人躯体的中间）。为解决这个问题，提出了center pooling。center pooling提取中心点水平方向和垂直方向的最大值并相加，以此给中心点提供所处位置以外的信息。<br><img src="fig5.png" alt="你想输入的替代文字"></p>
+<h3 id="Cascade-corner-pooling"><a href="#Cascade-corner-pooling" class="headerlink" title="Cascade corner pooling"></a>Cascade corner pooling</h3><p>　　角点经常超出目标物的边界，缺少局部视觉外形特征，这为角点的检测带来了困难。下图中左图为传统做法，称为 corner pooling。它提取物体边界最大值并相加，该方法只能提供关联物体边缘语义信息，对于更加丰富的物体内部语义信息则很难提取到。右图为cascade corner pooling 原理，它首先提取物体边界最大值，然后在边界最大值处继续向内部(图中沿虚线方向)提取提最大值，并与边界最大值相加，以此给角点特征提供更加丰富的关联物体语义信息。<br><img src="fig6.png" alt="你想输入的替代文字"></p>
+<h3 id="损失函数"><a href="#损失函数" class="headerlink" title="损失函数"></a>损失函数</h3><p><img src="fig7.png" alt="你想输入的替代文字"><br>　　与CornerNet类似</p>
+<h2 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h2><p>　　CoCo上47.0%，但是速度略慢，因为沙漏⏳网络原因。<br><img src="fig8.png" alt="你想输入的替代文字"></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>　　<a href="https://zhuanlan.zhihu.com/p/62789701" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/62789701</a><br>　　<a href="https://www.cnblogs.com/fourmi/p/10743820.html" target="_blank" rel="noopener">https://www.cnblogs.com/fourmi/p/10743820.html</a></p>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div>Donate comment here</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    Donate
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/alipay.jpg" alt="Jin Yao Alipay">
+        <p>Alipay</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/object-detection/" rel="tag"># object detection</a>
+          
+            <a href="/tags/one-stage/" rel="tag"># one-stage</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/07/08/论文阅读笔记-FSAF/" rel="prev" title="论文阅读笔记-FSAF">
+                论文阅读笔记-FSAF <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/jinyao.jpg" alt="Jin Yao">
+            
+              <p class="site-author-name" itemprop="name">Jin Yao</p>
+              <div class="site-description motion-element" itemprop="description">Yestearday you said tomorrow</div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                    <span class="site-state-item-count">1</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/jinyaocn" title="GitHub &rarr; https://github.com/jinyaocn" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:jinyaocn@gmail.com" title="E-Mail &rarr; mailto:jinyaocn@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#摘要"><span class="nav-number">1.</span> <span class="nav-text">摘要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#介绍"><span class="nav-number">2.</span> <span class="nav-text">介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#模型设计"><span class="nav-number">3.</span> <span class="nav-text">模型设计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#总览"><span class="nav-number">3.1.</span> <span class="nav-text">总览</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Center-pooling"><span class="nav-number">3.2.</span> <span class="nav-text">Center pooling</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Cascade-corner-pooling"><span class="nav-number">3.3.</span> <span class="nav-text">Cascade corner pooling</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#损失函数"><span class="nav-number">3.4.</span> <span class="nav-text">损失函数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#结果"><span class="nav-number">4.</span> <span class="nav-text">结果</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jin Yao</span>
+
+  
+
+  
+</div>
+
+<!--
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.1.1</div>
+
+-->
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="Total Visitors">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="Total Views">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.1"></script>
+
+  <script src="/js/motion.js?v=7.1.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/affix.js?v=7.1.1"></script>
+
+  <script src="/js/schemes/pisces.js?v=7.1.1"></script>
+
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.1"></script>
+<script src="/js/post-details.js?v=7.1.1"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

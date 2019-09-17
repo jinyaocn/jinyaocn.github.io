@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="google-site-verification" content="B4tYwMwNVJBQs7qgvVFPyfQXT3n2raGfBrAz5PSkIcs">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/new_favicon.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/new_favicon.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/new_favicon.png?v=7.1.1">
+
+
+  <link rel="mask-icon" href="/images/new_favicon.png?v=7.1.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.1.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="FSAF: Feature Selective Anchor-Free Module for Single-Shot Object Detection作者团队：卡内基梅隆大学（CMU）原文链接：https://arxiv.org/abs/1903.00621repo：未开源">
+<meta name="keywords" content="object detection,one-stage">
+<meta property="og:type" content="article">
+<meta property="og:title" content="论文阅读笔记-FSAF">
+<meta property="og:url" content="http://jinyaocn.github.io/2019/07/08/论文阅读笔记-FSAF/index.html">
+<meta property="og:site_name" content="Jin Yao&#39;s Blog">
+<meta property="og:description" content="FSAF: Feature Selective Anchor-Free Module for Single-Shot Object Detection作者团队：卡内基梅隆大学（CMU）原文链接：https://arxiv.org/abs/1903.00621repo：未开源">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://jinyaocn.github.io/2019/07/08/论文阅读笔记-FSAF/fig1.png">
+<meta property="og:image" content="http://jinyaocn.github.io/2019/07/08/论文阅读笔记-FSAF/fig2.png">
+<meta property="og:image" content="http://jinyaocn.github.io/2019/07/08/论文阅读笔记-FSAF/fig3.png">
+<meta property="og:image" content="http://jinyaocn.github.io/2019/07/08/论文阅读笔记-FSAF/fig4.png">
+<meta property="og:image" content="http://jinyaocn.github.io/2019/07/08/论文阅读笔记-FSAF/fig5.png">
+<meta property="og:image" content="http://jinyaocn.github.io/2019/07/08/论文阅读笔记-FSAF/fig6.png">
+<meta property="og:image" content="http://jinyaocn.github.io/2019/07/08/论文阅读笔记-FSAF/fig7.png">
+<meta property="og:image" content="http://jinyaocn.github.io/2019/07/08/论文阅读笔记-FSAF/fig8.png">
+<meta property="og:image" content="http://jinyaocn.github.io/2019/07/08/论文阅读笔记-FSAF/fig9.png">
+<meta property="og:image" content="http://jinyaocn.github.io/2019/07/08/论文阅读笔记-FSAF/fig10.png">
+<meta property="og:updated_time" content="2019-08-23T01:42:48.115Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="论文阅读笔记-FSAF">
+<meta name="twitter:description" content="FSAF: Feature Selective Anchor-Free Module for Single-Shot Object Detection作者团队：卡内基梅隆大学（CMU）原文链接：https://arxiv.org/abs/1903.00621repo：未开源">
+<meta name="twitter:image" content="http://jinyaocn.github.io/2019/07/08/论文阅读笔记-FSAF/fig1.png">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="http://jinyaocn.github.io/2019/07/08/论文阅读笔记-FSAF/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>论文阅读笔记-FSAF | Jin Yao's Blog</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Jin Yao's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">Stay hungry，stay foolish</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>Categories</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>About</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://jinyaocn.github.io/2019/07/08/论文阅读笔记-FSAF/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Jin Yao">
+      <meta itemprop="description" content="Yestearday you said tomorrow">
+      <meta itemprop="image" content="/images/jinyao.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Jin Yao's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">论文阅读笔记-FSAF
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-07-08 22:44:23" itemprop="dateCreated datePublished" datetime="2019-07-08T22:44:23+08:00">2019-07-08</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/object-detection/" itemprop="url" rel="index"><span itemprop="name">object detection</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             Views:  
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>FSAF: Feature Selective Anchor-Free Module for Single-Shot Object Detection<br>作者团队：卡内基梅隆大学（CMU）<br>原文链接：<a href="https://arxiv.org/abs/1903.00621" target="_blank" rel="noopener">https://arxiv.org/abs/1903.00621</a><br>repo：未开源</p>
+<hr>
+<a id="more"></a>
+<h2 id="说在前面"><a href="#说在前面" class="headerlink" title="说在前面"></a>说在前面</h2><p>　　近些年，在目标检测领域中，FPN+Anchor成为了各种网络的标配。我们知道，在FPN结构的特征金字塔网络中，浅层的网络层有更高的分辨率，适合检测较大的物体，深层的网络层有更多的语义信息，适合对小目标进行检测。但是在FPN中，隐藏着一个极其隐蔽的问题，<strong>不同尺寸大小的物体依靠其与FPN每一层Anchor的适配程度，分配到不同分辨率的层上进行学习</strong>。这种机制完全是heuristic-guilded，但是不一定是最合适的。</p>
+<h2 id="动机"><a href="#动机" class="headerlink" title="动机"></a>动机</h2><p>　　目标检测中一个重要的挑战就是尺度变换，为了解决尺度变换的问题，也诞生出了许多结构或者网络模型。比如，图像金字塔、SSD、FPN等。另外一种解决方法就是在feature map上遍历anchor，anchor最早在faster-rcnn中提出。我们会定义一系列稠密的均匀分布的anchor，这些anchor会根据其不同的尺寸大小和不同的feature map联系起来。在带有FPN的backbone中，高层的feature map分辨率高，得到的anchor数量多尺寸小，浅层的feature map分辨率低，得到的anchor数量少尺寸大，anchor的生成是根据feature map不同而定义的。在anchor match gt阶段，gt与anchor匹配，确定gt归属于哪些anchor，这个过程隐式的决定了gt会由哪层feature map负责预测。不管是生成anchor还是gt match 过程，都是由size这个变量决定，虽然我们会设定先验的规则来选择最好的feature map，但存在的问题是，仅仅利用size来决定哪些feature map来检测物体是一种暴力的做法。如下图所示，60x60大小的car和50x50大小的car被分在了不同feature map，50x50和40x40的被分在了同一级feature map，谁也不能证明这种做法不好，但谁也不能证明这种做法就是最好，那么何不让模型自动学习选择合适的feature 去做预测呢？<br><img src="fig1.png" alt="你想输入的替代文字" title="Selected feature level in anchor-based branches may not be optimal"></p>
+<h2 id="FASF模块"><a href="#FASF模块" class="headerlink" title="FASF模块"></a>FASF模块</h2><h3 id="模型总览"><a href="#模型总览" class="headerlink" title="模型总览"></a>模型总览</h3><p>　　文章中提出了FSAF模块来让模型自动选择最合适的feature，不用再依赖与anchor box，所以是一种anchor free目标检测方法，模型如下图所示。FSAF网络以RetinaNet网络为基础，既可以与RetinaNet原有的reg与cls分支并行，也可以单独使用。同样地，FSAF模块也可以嵌入到如SSD、DSSD等one stage网络结构中。<br><img src="fig2.png" alt="你想输入的替代文字" title="模型总览"><br>　　更为详细的结构如下图所示，基于RetinaNet，FSAF模块又引入了两个卷积层，分别负责分类与回归。FSAF的分类网络接在RentinaNet的class subnet后面，w×h×4，激活函数sigmod；同样的回归网络在box subnet后，w×h×4，激活函数为Relu。并且经过测试，FSAF对模型运行速度并无太大影响。<br><img src="fig3.png" alt="你想输入的替代文字" title="模型总览"></p>
+<h3 id="Ground-truth-and-loss"><a href="#Ground-truth-and-loss" class="headerlink" title="Ground-truth and loss"></a>Ground-truth and loss</h3><p>　　在介绍监督信号之前，先定义几个变量<br><img src="fig4.png" alt="你想输入的替代文字" title=" "></p>
+<h4 id="分类"><a href="#分类" class="headerlink" title="分类"></a>分类</h4><p><img src="fig5.png" alt="你想输入的替代文字" title=" "></p>
+<ul>
+<li>有效区域，即白色区域，gt表示为1；</li>
+<li>忽略区域减去有效区域，即灰色区域，梯度不回传，忽略；</li>
+<li>其他，即黑色区域，gt表示为0；<br><img src="fig6.png" alt="你想输入的替代文字" title=" "><br>　　特别的，当一个有效区域中存在两个实例时，小的实例更受关注，这点与<a href="https://arxiv.org/abs/1904.01355" target="_blank" rel="noopener">FCOS</a>类似。<h4 id="回归"><a href="#回归" class="headerlink" title="回归"></a>回归</h4>　　回归过程与其他anchor based方法类似，得到与坐标（x, y）相关的四个偏移量，但是值得注意的是，最后的输出除以了S，文中S的大小定为4.0，不知为何？decode过程为：<br><img src="fig7.png" alt="你想输入的替代文字" title=" "><h3 id="在线选择模块"><a href="#在线选择模块" class="headerlink" title="在线选择模块"></a>在线选择模块</h3>　　FSAF的核心起始就是在线选择模块，文中作者采用的在线选择模块方法是在所有feature level中选择loss最小的作为梯度反传。<br><img src="fig8.png" alt="你想输入的替代文字" title=" "><h3 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h3><img src="fig9.png" alt="你想输入的替代文字" title=" "><br><img src="fig10.png" alt="你想输入的替代文字" title=" "><h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3>　　起初，看这篇文章的原因是因为被文章的题目吸引，在题目中，作者指出了这是一种anchor free的方法。读完之后，的确，这是一个舍弃或者半舍弃anchor的方法，但是，作者更想表达的是FSAF即自动选择特征模块的重要性。加入一个不太影响速度的模块，无痛涨点，在线选择特征，给人很大启发。但文中坑还有很多，关于有效区域与忽略区域，S值，在线选择模块等都有未说清楚的地方。最最最关键的是！！！最最最关键的是！！！最最最关键的是！！！<br>　　<strong>未开源</strong>😭!!!<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><a href="https://zhuanlan.zhihu.com/p/58508985" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/58508985</a></li>
+</ul>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div>Donate comment here</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    Donate
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/alipay.jpg" alt="Jin Yao Alipay">
+        <p>Alipay</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/object-detection/" rel="tag"># object detection</a>
+          
+            <a href="/tags/one-stage/" rel="tag"># one-stage</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/05/29/论文阅读笔记-CenterNet/" rel="next" title="论文阅读笔记-CenterNet">
+                <i class="fa fa-chevron-left"></i> 论文阅读笔记-CenterNet
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/08/14/voc2coco/" rel="prev" title="VOC格式数据集转为COCO格式">
+                VOC格式数据集转为COCO格式 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/jinyao.jpg" alt="Jin Yao">
+            
+              <p class="site-author-name" itemprop="name">Jin Yao</p>
+              <div class="site-description motion-element" itemprop="description">Yestearday you said tomorrow</div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                    <span class="site-state-item-count">1</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/jinyaocn" title="GitHub &rarr; https://github.com/jinyaocn" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:jinyaocn@gmail.com" title="E-Mail &rarr; mailto:jinyaocn@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#说在前面"><span class="nav-number">1.</span> <span class="nav-text">说在前面</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#动机"><span class="nav-number">2.</span> <span class="nav-text">动机</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#FASF模块"><span class="nav-number">3.</span> <span class="nav-text">FASF模块</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#模型总览"><span class="nav-number">3.1.</span> <span class="nav-text">模型总览</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Ground-truth-and-loss"><span class="nav-number">3.2.</span> <span class="nav-text">Ground-truth and loss</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#分类"><span class="nav-number">3.2.1.</span> <span class="nav-text">分类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#回归"><span class="nav-number">3.2.2.</span> <span class="nav-text">回归</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在线选择模块"><span class="nav-number">3.3.</span> <span class="nav-text">在线选择模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#结果"><span class="nav-number">3.4.</span> <span class="nav-text">结果</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">3.5.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jin Yao</span>
+
+  
+
+  
+</div>
+
+<!--
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.1.1</div>
+
+-->
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="Total Visitors">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="Total Views">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.1"></script>
+
+  <script src="/js/motion.js?v=7.1.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/affix.js?v=7.1.1"></script>
+
+  <script src="/js/schemes/pisces.js?v=7.1.1"></script>
+
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.1"></script>
+<script src="/js/post-details.js?v=7.1.1"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
